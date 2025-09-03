@@ -9,3 +9,6 @@ Projeto de Edge Computing & IoT para o Check Point 4, com o objetivo de criar um
 
 [Projeto no Wokwi](https://wokwi.com/projects/441097422384179201)
 
+## 🔗 Link para o Projeto no Youtube
+
+[Projeto no Youtube](https://youtu.be/iSLP_8JrPrw)
