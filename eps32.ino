@@ -25,7 +25,7 @@ const char* password = "";          // Senha da rede Wi-Fi
 
 // --- Configuração do ThingSpeak ---
 const char* apiKey = "3INX495B5OU81KKK"; // Write API Key do canal
-const char* server = "http://api.thingspeak.com";
+const char* server = "http://api.thingspeak.com"; // URL do servidor ThingSpeak
 
 void setup() {
   Serial.begin(9600);
@@ -60,6 +60,7 @@ void loop() {
       delay(2000); // espera antes de tentar novamente
     }
 
+    // Se após 5 tentativas não houver leitura válida, mostra erro
     if (isnan(t) || isnan(h)) {
       Serial.println("Falha ao ler o DHT22!");
     } else {
@@ -109,6 +110,6 @@ void loop() {
     WiFi.begin(ssid, password);
   }
 
-  // ⚠️ Intervalo mínimo do ThingSpeak é 15s
+  // Intervalo
   delay(15000);
 }
