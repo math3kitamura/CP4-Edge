@@ -1,3 +1,12 @@
+/* 
+------------------ FIAP --------------------
+EDGE COMPUTING & COMPUTER SYSTEMS
+Participantes:
+Prof. Paulo Marcotti PF2150
+Matheus Kitamura Gurther RM563205
+--------------------------------------------
+*/
+
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <DHT.h>
