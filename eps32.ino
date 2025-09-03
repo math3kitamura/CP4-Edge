@@ -11,9 +11,9 @@ Matheus Kitamura Gurther RM563205
 #include <HTTPClient.h>
 #include <DHT.h>
 
-// --- Definições do DHT11 ---
-#define DHTPIN 15      // Pino GPIO15 conectado ao DHT11
-#define DHTTYPE DHT11  // Tipo de sensor: DHT11
+// --- Definições do DHT22 ---
+#define DHTPIN 15      // Pino GPIO15 conectado ao DHT22
+#define DHTTYPE DHT22  // Tipo de sensor: DHT22
 DHT dht(DHTPIN, DHTTYPE);
 
 // --- Definições do LDR ---
@@ -31,7 +31,6 @@ void setup() {
   Serial.begin(9600);
   dht.begin();
 
-  // Configuração dos pinos
   pinMode(LDR_PIN, INPUT);
 
   // Conexão ao Wi-Fi
@@ -46,53 +45,65 @@ void setup() {
 
 void loop() {
   if (WiFi.status() == WL_CONNECTED) {
+
     // --- Leitura dos sensores ---
-    float h = dht.readHumidity();
-    float t = dht.readTemperature();
-    int ldrValue = analogRead(LDR_PIN);        // Lê valor do LDR (0 a 4095)
-    float luminosity = map(ldrValue, 0, 4095, 0, 100); // Normaliza para % de luminosidade
+    float t = NAN;
+    float h = NAN;
 
-    // Verificação de erro no DHT11
-    if (isnan(h) || isnan(t)) {
-      Serial.println("Falha ao ler o sensor DHT11!");
-      return;
+    // Tenta ler o DHT22 até 5 vezes se der erro
+    int tentativas = 0;
+    while ((isnan(t) || isnan(h)) && tentativas < 5) {
+      h = dht.readHumidity();
+      t = dht.readTemperature();
+      if (!isnan(t) && !isnan(h)) break;
+      tentativas++;
+      delay(2000); // espera antes de tentar novamente
     }
 
-    // --- Debug no Serial ---
-    Serial.println("=== Dados Coletados ===");
-    Serial.print("Temperatura: ");
-    Serial.print(t);
-    Serial.println(" °C");
-
-    Serial.print("Umidade: ");
-    Serial.print(h);
-    Serial.println(" %");
-
-    Serial.print("Luminosidade: ");
-    Serial.print(luminosity);
-    Serial.println(" %");
-    Serial.println("========================");
-
-    // --- Envio ao ThingSpeak ---
-    HTTPClient http;
-    String url = String(server) + "/update?api_key=" + apiKey +
-                 "&field1=" + String(t) +
-                 "&field2=" + String(h) +
-                 "&field3=" + String(luminosity);
-
-    http.begin(url);
-    int httpCode = http.GET();
-
-    if (httpCode > 0) {
-      Serial.println("Dados enviados ao ThingSpeak!");
-      Serial.print("Código HTTP: ");
-      Serial.println(httpCode);
+    if (isnan(t) || isnan(h)) {
+      Serial.println("Falha ao ler o DHT22!");
     } else {
-      Serial.print("Erro ao enviar dados. Código HTTP: ");
-      Serial.println(httpCode);
+
+      // Leitura do LDR e normalização
+      int ldrValue = analogRead(LDR_PIN); 
+      float luminosity = (ldrValue / 4095.0) * 100.0; // % de luminosidade
+
+      // --- Debug no Serial ---
+      Serial.println("=== Dados Coletados ===");
+      Serial.print("Temperatura: ");
+      Serial.print(t);
+      Serial.println(" °C");
+
+      Serial.print("Umidade: ");
+      Serial.print(h);
+      Serial.println(" %");
+
+      Serial.print("Luminosidade: ");
+      Serial.print(luminosity);
+      Serial.println(" %");
+      Serial.println("========================");
+
+      // --- Envio ao ThingSpeak ---
+      HTTPClient http;
+      String url = String(server) + "/update?api_key=" + apiKey +
+                   "&field1=" + String(t, 2) +      // 2 casas decimais
+                   "&field2=" + String(h, 2) +
+                   "&field3=" + String(luminosity, 2);
+
+      http.begin(url);
+      int httpCode = http.GET();
+
+      if (httpCode > 0) {
+        Serial.println("Dados enviados ao ThingSpeak!");
+        Serial.print("Código HTTP: ");
+        Serial.println(httpCode);
+      } else {
+        Serial.print("Erro ao enviar dados. Código HTTP: ");
+        Serial.println(httpCode);
+      }
+      http.end();
     }
 
-    http.end();
   } else {
     Serial.println("WiFi desconectado. Tentando reconectar...");
     WiFi.begin(ssid, password);
