@@ -4,6 +4,8 @@ Projeto de Edge Computing & IoT para o Check Point 4, com o objetivo de criar um
 
 ## Nome dos Participantes
 - Matheus Kitamura Gurther – RM 563205
+- Matheus Da Costa Barroso - RM561308
+- Victor Oliveira Alves - RM565723
 
 ## 🔗 Link para o Projeto no Wokwi
 
